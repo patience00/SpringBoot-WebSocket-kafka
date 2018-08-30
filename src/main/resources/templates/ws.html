@@ -13,8 +13,6 @@
         <button id="disconnect" disabled="disabled" onclick="disconnect();">断开连接</button>
     </div>
     <div id="conversationDiv">
-        <label>输入你的名字</label><input type="text" id="name" />
-        <button id="sendName" onclick="sendName();">发送</button>
         <p id="response"></p>
     </div>
 </div>
@@ -42,20 +40,13 @@
             });
         });
     }
-	
-	
+
     function disconnect() {
         if (stompClient != null) {
             stompClient.disconnect();
         }
         setConnected(false);
         console.log("Disconnected");
-    }
-
-    function sendName() {
-        var name = $('#name').val();
-   		//通过stompClient.send 向/welcome 目标 发送消息,这个是在控制器的@messageMapping 中定义的。
-        stompClient.send("/welcome", {}, JSON.stringify({ 'name': name }));
     }
 
     function showResponse(message) {

@@ -5,6 +5,7 @@ import com.us.example.bean.Message;
 import com.us.example.bean.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -53,13 +54,18 @@ public class WebSocketController {
         return "chat";
     }
 
-
     @MessageMapping("/welcome")//浏览器发送请求通过@messageMapping 映射/welcome 这个地址。
     @Scheduled(cron = "0/1 * * * * ?") // 模拟kafka定时一直向前端发数据，每秒一条，可以发json
     public void say() throws Exception {
         messagingTemplate.convertAndSend("/topic/getResponse", new Response("当前时间 = " + dateFormat.format(new Date())));
     }
 
+    @MessageMapping("/kafka")//浏览器发送请求通过@messageMapping 映射/welcome 这个地址。
+    @KafkaListener(topics = {"${spring.kafka.template.default-topic}"}) // 模拟kafka定时一直向前端发数据，每秒一条，可以发json
+    public void kafka(String content) throws Exception {
+        System.out.println(content);
+        messagingTemplate.convertAndSend("/topic/getResponse", new Response(content));
+    }
 
     @MessageMapping("/chat")// 两个页面互相发送消息，聊天
     //在springmvc 中可以直接获得principal,principal 中包含当前用户的信息
