@@ -30,7 +30,6 @@ public class WebSocketConfig extends AbstractWebSocketMessageBrokerConfigurer{
         registry.addEndpoint("/endpointChat").withSockJS();
     }
 
-
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {//配置消息代理(message broker)
         //广播式应配置一个/topic 消息代理

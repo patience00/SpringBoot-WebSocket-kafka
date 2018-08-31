@@ -3,6 +3,7 @@ package com.us.example.controller;
 
 import com.us.example.bean.Message;
 import com.us.example.bean.Response;
+import com.us.example.service.KafkaService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -31,6 +32,8 @@ import java.util.Date;
 public class WebSocketController {
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
+    @Autowired
+    private KafkaService kafkaService;
     private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 
@@ -61,10 +64,11 @@ public class WebSocketController {
     }
 
     @MessageMapping("/kafka")//浏览器发送请求通过@messageMapping 映射/welcome 这个地址。
-    @KafkaListener(topics = {"${spring.kafka.template.default-topic}"}) // 模拟kafka定时一直向前端发数据，每秒一条，可以发json
+    @KafkaListener(topics = {"${spring.kafka.template.default-topic}"}, groupId = "bici-qt-data-test")
+    // 模拟kafka定时一直向前端发数据，每秒一条，可以发json
     public void kafka(String content) throws Exception {
         System.out.println(content);
-        messagingTemplate.convertAndSend("/topic/getResponse", new Response(content));
+        messagingTemplate.convertAndSend("/topic/kafka", new Response("kafka：  "+content));
     }
 
     @MessageMapping("/chat")// 两个页面互相发送消息，聊天
@@ -85,6 +89,12 @@ public class WebSocketController {
             messagingTemplate.convertAndSendToUser("admin",
                     "/queue/notifications", msg);
         }
+    }
+
+    @Scheduled(cron = "0/1 * * * * ?")
+    public void sendkafka() {
+        log.info("正在发送kafka");
+        kafkaService.produce(dateFormat.format(new Date()));
     }
 
 }
