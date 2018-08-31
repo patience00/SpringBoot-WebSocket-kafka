@@ -49,6 +49,7 @@ public class WebSocketController {
 
     @RequestMapping(value = "/ws")
     public String ws() {
+        // 聊天需要去掉security的注释和包引用，并登陆user和admin
         return "ws";
     }
 
@@ -93,7 +94,7 @@ public class WebSocketController {
 
     @Scheduled(cron = "0/1 * * * * ?")
     public void sendkafka() {
-        log.info("正在发送kafka");
+        log.info("正在发送kafka消息");
         kafkaService.produce(dateFormat.format(new Date()));
     }
 
