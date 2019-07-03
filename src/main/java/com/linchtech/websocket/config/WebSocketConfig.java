@@ -9,7 +9,7 @@ import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 /**
  * comment
  *
- * @author: 通天晓
+ * @author: linch
  * @review:
  * @date: 2018-08-29 17:26
  * @version: 1.0
