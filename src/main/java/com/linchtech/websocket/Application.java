@@ -1,4 +1,4 @@
-package com.us.example;
+package com.linchtech.websocket;
 
 /**
  * Created by yangyibo on 16/12/29.
@@ -10,7 +10,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 import static org.springframework.boot.SpringApplication.run;
 
-@ComponentScan(basePackages ="com.us.example")
 @SpringBootApplication
 @EnableScheduling
 public class Application {

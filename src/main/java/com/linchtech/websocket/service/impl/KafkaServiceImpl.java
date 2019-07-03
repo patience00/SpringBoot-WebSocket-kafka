@@ -1,19 +1,12 @@
-package com.us.example.service.impl;
+package com.linchtech.websocket.service.impl;
 
-import com.us.example.service.KafkaService;
-import org.apache.kafka.clients.producer.KafkaProducer;
-import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.clients.producer.RecordMetadata;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import com.linchtech.websocket.service.KafkaService;
 import org.springframework.stereotype.Service;
-
-import java.util.concurrent.Future;
 
 
 @Service
 public class KafkaServiceImpl implements KafkaService {
-
+/*
     @Value("${spring.kafka.template.default-topic}")
     private String topic;
 
@@ -34,5 +27,5 @@ public class KafkaServiceImpl implements KafkaService {
         }
         kafkaProducer.flush();
         return isSuccess;
-    }
+    }*/
 }

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8" />
+    <meta charset="UTF-8"/>
     <title>Spring Boot+WebSocket+kafka</title>
 
 </head>
@@ -27,20 +27,21 @@
         document.getElementById('conversationDiv').style.visibility = connected ? 'visible' : 'hidden';
         $('#response').html();
     }
-	
+
     function connect() {
         var socket = new SockJS('/endpointWisely'); //链接SockJS 的endpoint 名称为"/endpointWisely"
         stompClient = Stomp.over(socket);//使用stomp子协议的WebSocket 客户端
-        stompClient.connect({}, function(frame) {//链接Web Socket的服务端。
+        stompClient.connect({}, function (frame) {//链接Web Socket的服务端。
             setConnected(true);
             console.log('Connected: ' + frame);
-            stompClient.subscribe('/topic/kafka', function(respnose){ //订阅/topic/getResponse 目标发送的消息。这个是在控制器的@SendTo中定义的。
+            stompClient.subscribe('/topic/kafka', function (respnose) { //订阅/topic/kafka 目标发送的消息。
                 showResponse(JSON.parse(respnose.body).responseMessage);
+                console.log("消息=" + JSON.parse(respnose.body).responseMessage)
             });
         });
     }
-	
-	
+
+
     function disconnect() {
         if (stompClient != null) {
             stompClient.disconnect();
@@ -50,8 +51,8 @@
     }
 
     function showResponse(message) {
-          var response = $("#response");
-          response.html(message);
+        var response = $("#response");
+        response.html(message);
     }
 </script>
 </body>

@@ -1,4 +1,4 @@
-package com.us.example.bean;
+package com.linchtech.websocket.bean;
 
 /**
  * comment

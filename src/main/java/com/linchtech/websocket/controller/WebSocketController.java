@@ -1,12 +1,12 @@
-package com.us.example.controller;
+package com.linchtech.websocket.controller;
 
 
-import com.us.example.bean.Message;
-import com.us.example.bean.Response;
-import com.us.example.service.KafkaService;
+import com.linchtech.websocket.bean.Message;
+import com.linchtech.websocket.bean.Response;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.rabbit.core.RabbitMessagingTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -33,7 +33,7 @@ public class WebSocketController {
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
     @Autowired
-    private KafkaService kafkaService;
+    private RabbitMessagingTemplate rabbitMessagingTemplate;
     private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 
@@ -42,34 +42,36 @@ public class WebSocketController {
         return "login";
     }
 
-    @RequestMapping(value = "/listen")
+    @RequestMapping(value = "/timer")
     public String listen() {
         return "timer";
     }
 
     @RequestMapping(value = "/ws")
     public String ws() {
-        // 聊天需要去掉security的注释和包引用，并登陆user和admin
         return "ws";
     }
 
     @RequestMapping(value = "/chat")
     public String chat() {
+        // 聊天需要去掉security的注释和包引用，并登陆user和admin
         return "chat";
     }
 
     @MessageMapping("/welcome")//浏览器发送请求通过@messageMapping 映射/welcome 这个地址。
     @Scheduled(cron = "0/1 * * * * ?") // 模拟kafka定时一直向前端发数据，每秒一条，可以发json
     public void say() throws Exception {
-        messagingTemplate.convertAndSend("/topic/getResponse", new Response("当前时间 = " + dateFormat.format(new Date())));
+        // 向前端页面发送时间,前端页面ws.html监听/topic/getResponse
+        messagingTemplate.convertAndSend("/topic/getResponse", new Response("当前时间 === " + dateFormat.format(new Date())));
     }
 
     @MessageMapping("/kafka")//浏览器发送请求通过@messageMapping 映射/welcome 这个地址。
-    @KafkaListener(topics = {"${spring.kafka.template.default-topic}"}, groupId = "bici-qt-data-test")
-    // 模拟kafka定时一直向前端发数据，每秒一条，可以发json
+    @RabbitListener(queues = "ws-test")
+    // 模拟MQ定时一直向前端发数据，每秒一条，可以发json
     public void kafka(String content) throws Exception {
         System.out.println(content);
-        messagingTemplate.convertAndSend("/topic/kafka", new Response("kafka：  "+content));
+        // 向前端页面发送数据,前端timer.html里面监听/topic/kafka
+        messagingTemplate.convertAndSend("/topic/kafka", new Response("MQ：  " + content));
     }
 
     @MessageMapping("/chat")// 两个页面互相发送消息，聊天
@@ -84,18 +86,19 @@ public class WebSocketController {
         if (principal.getName().equals("admin")) {
             //通过convertAndSendToUser 向用户发送信息,
             // 第一个参数是接收消息的用户,第二个参数是浏览器订阅的地址,第三个参数是消息本身
-            messagingTemplate.convertAndSendToUser("user",
-                    "/queue/notifications", msg);
+            // messagingTemplate.convertAndSendToUser("user",
+            //         "/queue/notifications", msg);
         } else {
-            messagingTemplate.convertAndSendToUser("admin",
-                    "/queue/notifications", msg);
+            // messagingTemplate.convertAndSendToUser("admin",
+            //         "/queue/notifications", msg);
         }
     }
 
     @Scheduled(cron = "0/1 * * * * ?")
     public void sendkafka() {
-        log.info("正在发送kafka消息");
-        kafkaService.produce(dateFormat.format(new Date()));
+        log.info("正在发送rabbitMQ消息,当前时间:{}", dateFormat.format(new Date()));
+        // kafkaService.produce(dateFormat.format(new Date()));
+        rabbitMessagingTemplate.convertAndSend("ws-test", dateFormat.format(new Date()));
     }
 
 }
